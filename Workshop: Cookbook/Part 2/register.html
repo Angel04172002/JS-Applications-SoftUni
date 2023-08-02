@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Cookbook</title>
+    <link rel="stylesheet" href="static/site.css">
+    <link rel="stylesheet" href="static/recipe.css">
+    <link rel="stylesheet" href="static/form.css">
+</head>
+
+<body>
+    <header>
+        <h1>My Cookbook</h1>
+        <nav>
+            <a href="index.html">Catalog</a>
+            <a href="login.html">Login</a>
+            <a class="active">Register</a>
+        </nav>
+    </header>
+    <main>
+        <article>
+            <h2>Register</h2>
+            <form>
+                <label>E-mail: <input type="text" name="email"></label>
+                <label>Password: <input type="password" name="password"></label>
+                <label>Repeat: <input type="password" name="rePass"></label>
+                <input type="submit" value="Register">
+            </form>
+        </article>
+    </main>
+
+    <script>
+
+        const formElement = document.querySelector('form');
+
+        formElement.addEventListener('submit', (e) => {
+
+            e.preventDefault();
+
+            const formData = new FormData(e.currentTarget);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const rePassword = formData.get('rePass');
+            const url = 'http://localhost:3030/users/register';
+
+            if(password !== rePassword) {
+                alert('Passwords do not match');
+                return;
+            };
+
+            const data = {
+                email,
+                password
+            };
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(user => {
+                    
+                    localStorage.setItem('accessToken', user.accessToken);
+                    localStorage.setItem('_id', user._id);
+                })
+                .catch(err => console.log(err))
+        });
+
+
+    </script>
+</body>
+
+</html>
