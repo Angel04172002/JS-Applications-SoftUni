@@ -52,6 +52,10 @@ async function displayData(e) {
         return alert('Wrong input data');
     };
 
+    if(firstNameInputElement.value === '' || lastNameInputElement.value === '' || facultyNumberInputElement.value === '' || gradeInputElement.value === '') {
+        return;
+    };
+
     const tableBody = document.querySelector('#results tbody');
 
     const response = await fetch(url, {
@@ -67,10 +71,6 @@ async function displayData(e) {
         })
     });
 
-
-    if (response.status !== 200) {
-        return;
-    };
 
     const data = await response.json();
 
@@ -102,4 +102,5 @@ async function displayData(e) {
 
 
 solve();
+
 
