@@ -1,64 +1,47 @@
 const url = 'http://localhost:3030/jsonstore/collections/students';
 
-async function solve() {
 
-    const submitButtonElement = document.getElementById('submit');
-    const tableBody = document.querySelector('#results tbody');
+const firstNameInputElement = document.querySelector('input[name="firstName"]');
+const lastNameInputElement = document.querySelector('input[name="lastName"]');
+const facultyNumberInputElement = document.querySelector('input[name="facultyNumber"]');
+const gradeInputElement = document.querySelector('input[name="grade"]');
+const submitBtnElement = document.getElementById('submit');
+const resultTable = document.querySelector('#results tbody');
+
+submitBtnElement.addEventListener('click', createRow);
+
+
+async function solve() {
 
     const response = await fetch(url);
     const data = await response.json();
 
-    Object.values(data).forEach(x => {
+    resultTable.innerHTML = '';
 
-        let { firstName, lastName, facultyNumber, grade } = x;
-        grade = Number(grade);
+    Object.values(data).forEach(({ firstName, lastName, facultyNumber, grade, _id }) => {
 
-        const trElement = document.createElement('tr');
+        const tableRow = tr(
+            {},
+            td({}, firstName),
+            td({}, lastName),
+            td({}, facultyNumber),
+            td({}, grade)
+        );
 
-        const firstNameTdElement = document.createElement('td');
-        const lastNameTdElement = document.createElement('td');
-        const facultyNumberTdElement = document.createElement('td');
-        const gradeTdElement = document.createElement('td');
-
-        firstNameTdElement.textContent = firstName;
-        lastNameTdElement.textContent = lastName;
-        facultyNumberTdElement.textContent = facultyNumber;
-        gradeTdElement.textContent = grade;
-
-        trElement.appendChild(firstNameTdElement);
-        trElement.appendChild(lastNameTdElement);
-        trElement.appendChild(facultyNumberTdElement);
-        trElement.appendChild(gradeTdElement);
-
-        tableBody.appendChild(trElement);
+        tableRow._id = _id;
+        resultTable.appendChild(tableRow);
     });
 
-    submitButtonElement.addEventListener('click', displayData);
 }
 
+async function createRow() {
 
-
-
-async function displayData(e) {
-
-    e.preventDefault();
-
-    const firstNameInputElement = document.querySelector('.inputs input[name="firstName"]');
-    const lastNameInputElement = document.querySelector('.inputs input[name="lastName"]');
-    const facultyNumberInputElement = document.querySelector('.inputs input[name="facultyNumber"]');
-    const gradeInputElement = document.querySelector('.inputs input[name="grade"]');
-
-    if(isNaN(facultyNumberInputElement.value) || isNaN(gradeInputElement.value)) {
-        return alert('Wrong input data');
-    };
-
-    if(firstNameInputElement.value === '' || lastNameInputElement.value === '' || facultyNumberInputElement.value === '' || gradeInputElement.value === '') {
+    if (firstNameInputElement.value === '' || lastNameInputElement.value === '' ||
+        facultyNumberInputElement.value === '' || gradeInputElement.value === '') {
         return;
     };
 
-    const tableBody = document.querySelector('#results tbody');
-
-    const response = await fetch(url, {
+    await fetch(url, {
         method: 'POST',
         headers: {
             'content-type': 'application/json'
@@ -66,41 +49,51 @@ async function displayData(e) {
         body: JSON.stringify({
             firstName: firstNameInputElement.value,
             lastName: lastNameInputElement.value,
-            facultyNumber: Number(facultyNumberInputElement.value),
-            grade: Number(gradeInputElement.value)
+            facultyNumber: facultyNumberInputElement.value,
+            grade: gradeInputElement.value,
         })
     });
 
-
-    const data = await response.json();
-
-    const trElement = document.createElement('tr');
-    const dataKeys = Object.keys(data);
-
-    dataKeys.map((x, i) => {
-
-        if (i === dataKeys.length - 1) {
-            return;
-        };
-
-        return data[dataKeys[i]];
-    }).forEach(x => {
-
-        const tdElement = document.createElement('td');
-        tdElement.textContent = x;
-        trElement.appendChild(tdElement);
-    });
-
-    tableBody.appendChild(trElement);
-
-    firstNameInputElement.value = '';
-    lastNameInputElement.value = '';
-    facultyNumberInputElement.value = '';
-    gradeInputElement.value = '';
+    solve();
 }
 
 
+function tr(props, ...data) {
+    return createElement('tr', props, ...data);
+}
+
+function td(props, ...data) {
+    return createElement('td', props, ...data);
+}
+
+
+function createElement(type, props, ...data) {
+
+    const element = document.createElement(type);
+
+    for (let prop in props) {
+
+        if (prop === 'class') {
+            element.classList.add(props[prop]);
+            continue;
+        };
+
+        element[prop] = props[prop];
+    };
+
+
+    for (let entry of data) {
+
+        if (typeof entry === 'number' || typeof entry === 'string') {
+            entry = document.createTextNode(entry);
+        };
+
+        element.appendChild(entry);
+    };
+
+    return element;
+}
+
 
 solve();
-
 
